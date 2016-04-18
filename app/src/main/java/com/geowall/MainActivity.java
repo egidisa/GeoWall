@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         itemsUrl = Constants.FIREBASE_URL+"/users/"+ mUserId + "/items";
 
         //set up ListView
-        final ListView listView = (ListView)findViewById(R.id.listView);
+        /*final ListView listView = (ListView)findViewById(R.id.listView);
         final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,android.R.id.text1);
         listView.setAdapter(adapter);
 
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onCancelled(FirebaseError firebaseError) {
 
                     }
-                });
+                });*/
     }
 
     @Override
