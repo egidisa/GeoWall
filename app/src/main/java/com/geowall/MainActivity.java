@@ -40,7 +40,8 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             loadLoginView();
         }
-        itemsUrl = Constants.FIREBASE_URL+"/users/"+ mUserId + "/items";
+        //TODO - ci sono scritti i metodi per caricare e scaricare snapshot dal db
+        //itemsUrl = Constants.FIREBASE_URL+"/users/"+ mUserId + "/items";
 
         //set up ListView
         /*final ListView listView = (ListView)findViewById(R.id.listView);
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        //logout selected
         if (id == R.id.action_logout) {
             mRef.unauth();
             loadLoginView();

@@ -75,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
                             map.put("email", emailAddress);
                             //ref.child("users").child(authData.getUid()).setValue(map);
                             ref.child("users").child(authData.getUid()).updateChildren(map);
-                            Intent intent = new Intent(LoginActivity.this,MapsActivity.class); // TODO
+                            Intent intent = new Intent(LoginActivity.this, MapsActivity.class); // TODO
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
