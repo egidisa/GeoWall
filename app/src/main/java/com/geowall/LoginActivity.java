@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.geowall.com.geowall.services.FirebaseManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = (Button)findViewById(R.id.loginButton);
 
         //firebase reference
-        final Firebase ref = new Firebase(Constants.FIREBASE_URL);
+        final Firebase ref = FirebaseManager.getInstance();
 
         //opens new activity for sign up
         signUpTextView.setOnClickListener(new TextView.OnClickListener(){
