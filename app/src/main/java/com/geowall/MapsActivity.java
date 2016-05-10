@@ -179,8 +179,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .tilt(30)                   // Sets the tilt of the camera to 30 degrees
                 .build();                   // Creates a CameraPosition from the builder
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        geoFire.setLocation("users/7aa8e365-2717-46c5-89ce-3e94c09e9594/", new GeoLocation(37.7853889, -122.4056973));
-        geoFire.setLocation("users/d202c104-b6ad-428d-bda1-a52302d4fe6b/", new GeoLocation(myLoc.latitude,myLoc.longitude));
+        //geoFire.setLocation("users/7aa8e365-2717-46c5-89ce-3e94c09e9594/", new GeoLocation(37.7853889, -122.4056973));
+        //geoFire.setLocation("0/loc", new GeoLocation(myLoc.latitude,myLoc.longitude));
+        Firebase bacheca = mRef.child("0").child("msgCount");
+        //Firebase bacheca = mRef.child("users").child("d202c104-b6ad-428d-bda1-a52302d4fe6b").child("msgCount");
+        //Long l = new Long(7);
+        //bacheca.setValue(l);
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(myLoc));
     }
 
