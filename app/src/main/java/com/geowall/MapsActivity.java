@@ -17,9 +17,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.Query;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.geowall.com.geowall.domain.Wall;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
@@ -216,31 +220,44 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         LatLng temp = new LatLng(43.720386, 10.390444);
         mMap.addMarker(new MarkerOptions().position(temp).title("wall01").snippet("chiesa"));
+        //load walls and creates markers
+        Query queryRef = mRef;
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                Wall walls = snapshot.getValue(Wall.class);
+                System.out.println(snapshot.getKey() + " was " + walls.getLat() + " meters tall");
+            }
+            @Override
+            public void onChildRemoved(DataSnapshot snapshot) {
+                Wall walls = snapshot.getValue(Wall.class);
+                System.out.println(snapshot.getKey() + " was " + walls.getLat() + " meters tall");
+            }
+            @Override
+            public void onChildChanged(DataSnapshot snapshot,String previousChild) {
+                Wall walls = snapshot.getValue(Wall.class);
+                System.out.println(snapshot.getKey() + " was " + walls.getLat() + " meters tall");
+            }
+        });
 
     }
 
-    //    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //logout selected
-//        if (id == R.id.action_logout) {
-//            mRef.unauth();
-//            loadLoginView();
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //logout selected
+        if (id == R.id.action_logout) {
+            mRef.unauth();
+            loadLoginView();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     private void loadLoginView() {
         Intent intent = new Intent(this, LoginActivity.class);
         //ogni task contiene più attività. Settare questi flag serve a iniziare
@@ -258,20 +275,5 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_logout) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }
