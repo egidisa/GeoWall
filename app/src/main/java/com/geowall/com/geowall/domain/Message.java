@@ -6,7 +6,7 @@ package com.geowall.com.geowall.domain;
 public class Message {
     String id;
     String uid;
-    String date;
+    String timestamp;
     String content;
 
     public Message() {
@@ -28,12 +28,12 @@ public class Message {
         this.uid = uid;
     }
 
-    public String getDate() {
-        return date;
+    public String getTimestamp() {
+        return timestamp;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getContent() {

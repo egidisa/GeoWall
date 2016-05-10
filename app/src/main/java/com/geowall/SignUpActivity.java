@@ -11,6 +11,7 @@ import android.widget.EditText;
 
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.geowall.com.geowall.services.FirebaseManager;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -27,7 +28,7 @@ public class SignUpActivity extends AppCompatActivity {
         emailEditText = (EditText)findViewById(R.id.emailField);
         signUpButton = (Button)findViewById(R.id.signupButton);
 
-        final Firebase ref = new Firebase(Constants.FIREBASE_URL);
+        final Firebase ref = FirebaseManager.getInstance();
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override

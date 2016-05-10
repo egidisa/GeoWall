@@ -7,11 +7,22 @@ import java.util.List;
  */
 public class Wall {
 
+    Long id;
     String name;
-    String geoFireKey;
+    Double lat;
+    Double lon;
+    Long msgCount;
     List<Message> messages;
 
     public Wall() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -22,12 +33,28 @@ public class Wall {
         this.name = name;
     }
 
-    public String getGeoFireKey() {
-        return geoFireKey;
+    public Double getLat() {
+        return lat;
     }
 
-    public void setGeoFireKey(String geoFireKey) {
-        this.geoFireKey = geoFireKey;
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLon() {
+        return lon;
+    }
+
+    public void setLon(Double lon) {
+        this.lon = lon;
+    }
+
+    public Long getMsgCount() {
+        return msgCount;
+    }
+
+    public void setMsgCount(Long msgCount) {
+        this.msgCount = msgCount;
     }
 
     public List<Message> getMessages() {

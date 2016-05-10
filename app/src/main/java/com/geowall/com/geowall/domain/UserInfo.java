@@ -6,7 +6,6 @@ package com.geowall.com.geowall.domain;
 public class UserInfo {
     String uid;
     String email;
-    String password;
     String nickname;
 
     public UserInfo() {
@@ -26,14 +25,6 @@ public class UserInfo {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getNickname() {
