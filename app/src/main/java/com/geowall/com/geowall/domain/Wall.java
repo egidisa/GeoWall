@@ -12,7 +12,8 @@ public class Wall {
     Double lat;
     Double lon;
     Long msgCount;
-    List<Message> messages;
+
+    //List<Message> messages;
 
     public Wall() {
     }
@@ -57,11 +58,7 @@ public class Wall {
         this.msgCount = msgCount;
     }
 
-    public List<Message> getMessages() {
-        return messages;
-    }
+    //public List<Message> getMessages() {return messages;    }
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
-    }
+    //public void setMessages(List<Message> messages) {this.messages = messages;    }
 }

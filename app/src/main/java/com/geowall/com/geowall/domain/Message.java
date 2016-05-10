@@ -7,7 +7,7 @@ public class Message {
     String id;
     String uid;
     String timestamp;
-    String content;
+    String text;
 
     public Message() {
     }
@@ -36,11 +36,11 @@ public class Message {
         this.timestamp = timestamp;
     }
 
-    public String getContent() {
-        return content;
+    public String getText() {
+        return text;
     }
 
     public void setContent(String content) {
-        this.content = content;
+        this.text = content;
     }
 }

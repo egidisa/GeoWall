@@ -20,7 +20,10 @@ import android.widget.Toast;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.GenericTypeIndicator;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.geowall.com.geowall.domain.Wall;
@@ -39,6 +42,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, ConnectionCallbacks, OnConnectionFailedListener {
 
@@ -76,6 +81,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+        //////////////
+
     }
 
     private void getLocation() {
@@ -186,6 +193,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //geoFire.setLocation("users/7aa8e365-2717-46c5-89ce-3e94c09e9594/", new GeoLocation(37.7853889, -122.4056973));
         //geoFire.setLocation("0/loc", new GeoLocation(myLoc.latitude,myLoc.longitude));
         Firebase bacheca = mRef.child("0").child("msgCount");
+        //TODO - inserimento dati in fb
         //Firebase bacheca = mRef.child("users").child("d202c104-b6ad-428d-bda1-a52302d4fe6b").child("msgCount");
         //Long l = new Long(7);
         //bacheca.setValue(l);
@@ -221,24 +229,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng temp = new LatLng(43.720386, 10.390444);
         mMap.addMarker(new MarkerOptions().position(temp).title("wall01").snippet("chiesa"));
         //load walls and creates markers
-        Query queryRef = mRef;
-        queryRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                Wall walls = snapshot.getValue(Wall.class);
-                System.out.println(snapshot.getKey() + " was " + walls.getLat() + " meters tall");
-            }
-            @Override
-            public void onChildRemoved(DataSnapshot snapshot) {
-                Wall walls = snapshot.getValue(Wall.class);
-                System.out.println(snapshot.getKey() + " was " + walls.getLat() + " meters tall");
-            }
-            @Override
-            public void onChildChanged(DataSnapshot snapshot,String previousChild) {
-                Wall walls = snapshot.getValue(Wall.class);
-                System.out.println(snapshot.getKey() + " was " + walls.getLat() + " meters tall");
-            }
-        });
+        displayWalls();
 
     }
 
@@ -275,5 +266,37 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    private void displayWalls() {
+
+        Query queryRef = mRef.child("walls");
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                //for(DataSnapshot child : snapshot.getChildren()){
+                    //
+                    //GenericTypeIndicator<List<Wall>> t = new GenericTypeIndicator<List<Wall>>() {};
+                    //List<Wall> walls = snapshot.getValue(t);
+                    //
+                    Wall walls = snapshot.getValue(Wall.class);
+                    //TODO log here
+                    LatLng temp2 = new LatLng(walls.getLat(), walls.getLon());
+                    mMap.addMarker(new MarkerOptions().position(temp2).title(walls.getName()).snippet("hellow, can you hear me?"));
+                }
+            //}
+            @Override
+            public void onChildRemoved(DataSnapshot snapshot) {
+            }
+            @Override
+            public void onChildChanged(DataSnapshot snapshot,String previousChild) {
+            }
+            @Override
+            public void onChildMoved(DataSnapshot snapshot,String previousChild) {
+            }
+            @Override
+            public void onCancelled(FirebaseError e){}
+
+        });
     }
 }
