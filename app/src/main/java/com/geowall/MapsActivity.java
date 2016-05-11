@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.NumberPicker;
 import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
@@ -131,6 +132,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         AlertDialog dialog = newWallDialog.create();
+        /*final NumberPicker np = (NumberPicker) dialog.findViewById(R.id.numberPicker1);
+        np.setMaxValue(100);
+        np.setMinValue(0);
+        np.setWrapSelectorWheel(false);*/
         dialog.show();
     }
 
