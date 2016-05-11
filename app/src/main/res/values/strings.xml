@@ -17,4 +17,6 @@
     <string name="action_logout">Logout</string>
     <string name="title_activity_maps">Map</string>
     <string name="no_location_detected">No location detected</string>
+    <string name="title_activity_deleteme">deleteme</string>
+    <string name="title_activity_main2">Main2Activity</string>
 </resources>

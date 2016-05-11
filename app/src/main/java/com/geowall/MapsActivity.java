@@ -6,6 +6,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 
@@ -15,6 +17,7 @@ import android.util.Log;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
@@ -42,6 +45,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 
 import java.util.List;
 
@@ -66,8 +71,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO aprire dialog  per inserire nome e raggio (?)
+                createNewWall(mLastLocation);
+                //TODO alla conferma del dialog inserire nuovo landmark ed aprire la bacheca appena creata
+
+
+                //TODO se c'è già bacheca vicina non dovrebbe poterne inserire una nuova
+                Snackbar.make(view, "The is already a wall close to you!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
 
 
         mRef = new Firebase(Constants.FIREBASE_URL);
@@ -83,6 +100,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
         //////////////
 
+    }
+
+    //Method that shows a dialog where the user defines a new wall parameters. The new wall
+    // is then pushed into the db
+    private void createNewWall(Location mLastLocation) {
+        final AlertDialog.Builder newWallDialog = new AlertDialog.Builder(this);
+        newWallDialog.setTitle("Create new wall");
+        newWallDialog.setMessage("let's try this");
+        newWallDialog.setIcon(R.drawable.common_google_signin_btn_icon_light);
+        newWallDialog.setCancelable(false);
+        newWallDialog.setPositiveButton("Create", new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dial, int id){
+                //TODO check name and open wall activity
+            }
+        } );
+        newWallDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dial, int id){
+                dial.dismiss();
+            }
+        });
+
+        AlertDialog dialog = newWallDialog.create();
+        dialog.show();
     }
 
     private void getLocation() {
