@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +16,7 @@ import com.geowall.com.geowall.services.FirebaseManager;
 
 public class SignUpActivity extends AppCompatActivity {
 
+    private static final String TAG = SignUpActivity.class.getSimpleName();
     protected EditText passwordEditText;
     protected EditText emailEditText;
     protected Button signUpButton;
@@ -33,6 +35,7 @@ public class SignUpActivity extends AppCompatActivity {
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.i(TAG, "BEGIN: signUpButton.onClick()");
                 String password = passwordEditText.getText().toString();
                 String email = emailEditText.getText().toString();
 
@@ -80,5 +83,7 @@ public class SignUpActivity extends AppCompatActivity {
                 }
             }
         });
+
+        Log.i(TAG, "END: signUpButton.onClick()");
     }
 }
