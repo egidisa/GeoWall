@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -106,6 +107,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // is then pushed into the db
     private void createNewWall(Location mLastLocation) {
         final AlertDialog.Builder newWallDialog = new AlertDialog.Builder(this);
+
+        // Get the layout inflater
+        LayoutInflater inflater = this.getLayoutInflater();
+
+        // Inflate and set the layout for the dialog
+        // Pass null as the parent view because its going in the dialog layout
+        newWallDialog.setView(inflater.inflate(R.layout.dialoglayout, null));
+
         newWallDialog.setTitle("Create new wall");
         newWallDialog.setMessage("let's try this");
         newWallDialog.setIcon(R.drawable.common_google_signin_btn_icon_light);
