@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
@@ -106,23 +107,38 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //Method that shows a dialog where the user defines a new wall parameters. The new wall
     // is then pushed into the db
-    private void createNewWall(Location mLastLocation) {
+    private void createNewWall(final Location mLastLocation) {
         final AlertDialog.Builder newWallDialog = new AlertDialog.Builder(this);
 
+        //final EditText wallName = (EditText) findViewById(R.id.wallname);
         // Get the layout inflater
         LayoutInflater inflater = this.getLayoutInflater();
-
+        View view = inflater.inflate(R.layout.dialoglayout, null);
+        final EditText wallName = (EditText)view.findViewById(R.id.wallname);
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        newWallDialog.setView(inflater.inflate(R.layout.dialoglayout, null));
+        newWallDialog.setView(view);
 
         newWallDialog.setTitle("Create new wall");
         newWallDialog.setMessage("let's try this");
         newWallDialog.setIcon(R.drawable.common_google_signin_btn_icon_light);
-        newWallDialog.setCancelable(false);
         newWallDialog.setPositiveButton("Create", new DialogInterface.OnClickListener(){
             public void onClick(DialogInterface dial, int id){
                 //TODO check name and open wall activity
+                Firebase wallRef = mRef.child("walls");
+                Wall newWall = new Wall();
+                newWall.setName(wallName.getText().toString());
+                if (mLastLocation!=null){
+                    newWall.setLat(mLastLocation.getLatitude());
+                    newWall.setLon(mLastLocation.getLongitude());
+                }else{
+                    newWall.setLat(43.763789);
+                    newWall.setLon(10.406054);
+                }
+                newWall.setMsgCount(new Long(0));
+                newWall.setId(new Long (3));
+                wallRef.push().setValue(newWall);
+
             }
         } );
         newWallDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
