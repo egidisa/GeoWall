@@ -58,6 +58,16 @@ public class Wall {
         this.msgCount = msgCount;
     }
 
+    @Override
+    public String toString() {
+        return "Wall{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", lat=" + lat +
+                ", lon=" + lon +
+                ", msgCount=" + msgCount +
+                '}';
+    }
     //public List<Message> getMessages() {return messages;    }
 
     //public void setMessages(List<Message> messages) {this.messages = messages;    }
