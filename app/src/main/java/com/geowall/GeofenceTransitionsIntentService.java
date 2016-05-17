@@ -32,6 +32,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -43,7 +44,11 @@ import java.util.List;
  */
 public class GeofenceTransitionsIntentService extends IntentService {
 
-    protected static final String TAG = "GeofenceTransitionsIS";
+    protected static final String TAG = GeofenceTransitionsIntentService.class.getSimpleName();
+    public static final String NOTIFICATION = "com.geowall";
+    public static final String TRIGGERING_GEOFENCES = "triggeringGeofences";
+    public static final String GEOFENCE_TRANSITION = "geofenceTransition";
+    private HashMap<String, String> wallsMap;
 
     /**
      * This constructor is required, and calls the super IntentService(String)
@@ -66,6 +71,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.i(TAG,"BEGIN:onHandleIntent()");
         Log.i(TAG,"Intent_received");
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
@@ -75,6 +81,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
             return;
         }
 
+        wallsMap = (HashMap<String, String>)intent.getSerializableExtra("wallsMap");
+        Log.i(TAG,"onHandleIntent():tmpWallMap = " + wallsMap.toString());
         // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
@@ -94,11 +102,22 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
             // Send notification and log the transition details.
             sendNotification(geofenceTransitionDetails);
+            sendIntentToMapsActivity(new ArrayList<Geofence>(triggeringGeofences), geofenceTransition);
             Log.i(TAG, geofenceTransitionDetails);
         } else {
             // Log the error.
             Log.e(TAG, getString(R.string.geofence_transition_invalid_type, geofenceTransition));
         }
+        Log.i(TAG,"END:onHandleIntent()");
+    }
+
+    private void sendIntentToMapsActivity(ArrayList<Geofence> triggeringGeofences, int geofenceTransition) {
+        Log.i(TAG, "BEGIN:sendIntentToMapsActivity");
+        Intent intent = new Intent(NOTIFICATION);
+        intent.putExtra(TRIGGERING_GEOFENCES, triggeringGeofences);
+        intent.putExtra(GEOFENCE_TRANSITION, geofenceTransition);
+        sendBroadcast(intent);
+        Log.i(TAG, "END:sendIntentToMapsActivity");
     }
 
     /**
@@ -117,9 +136,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
         String geofenceTransitionString = getTransitionString(geofenceTransition);
 
         // Get the Ids of each geofence that was triggered.
-        ArrayList triggeringGeofencesIdsList = new ArrayList();
+        ArrayList<String> triggeringGeofencesIdsList = new ArrayList<>();
+        String wallName = "";
         for (Geofence geofence : triggeringGeofences) {
-            triggeringGeofencesIdsList.add(geofence.getRequestId());
+            wallName = wallsMap.get(geofence.getRequestId());
+            triggeringGeofencesIdsList.add(wallName);
+            Log.i(TAG,"getGeofenceTransitionDetails():(requestId, wallName) = ("+ geofence.getRequestId() + ", " + wallName + ")");
         }
         String triggeringGeofencesIdsString = TextUtils.join(", ",  triggeringGeofencesIdsList);
 
@@ -132,13 +154,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
      */
     private void sendNotification(String notificationDetails) {
         // Create an explicit content Intent that starts the main Activity.
-        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+        Intent notificationIntent = new Intent(getApplicationContext(), MapsActivity.class);
 
         // Construct a task stack.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 
         // Add the main Activity to the task stack as the parent.
-        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addParentStack(MapsActivity.class);
 
         // Push the content Intent onto the stack.
         stackBuilder.addNextIntent(notificationIntent);
@@ -151,11 +173,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         // Define the notification settings.
-        builder.setSmallIcon(R.drawable.ic_launcher)
+        builder.setSmallIcon(R.drawable.app_icon)
                 // In a real app, you may want to use a library like Volley
                 // to decode the Bitmap.
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                        R.drawable.ic_launcher))
+                        R.drawable.app_icon))
                 .setColor(Color.RED)
                 .setContentTitle(notificationDetails)
                 .setContentText(getString(R.string.geofence_transition_notification_text))

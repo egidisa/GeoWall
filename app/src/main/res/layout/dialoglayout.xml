@@ -1,7 +1,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="26dp"
+    android:paddingRight="26dp"
+
+    >
 <!--    <ImageView
         android:src="@drawable/header_logo"
         android:layout_width="match_parent"
@@ -15,34 +19,17 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Wall name"
         android:id="@+id/textView1"
-        android:layout_alignTop="@+id/username"
-        android:layout_alignStart="@+id/textView2" />
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:id="@+id/wallname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
+
         android:hint="@string/wall_title"
         android:inputType="textShortMessage"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/textView1"
+        android:layout_toRightOf ="@id/textView1"
         android:layout_marginStart="45dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Radius"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/username" />
-
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinner"
-        android:layout_below="@+id/wallname"
-        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

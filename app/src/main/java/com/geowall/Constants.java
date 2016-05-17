@@ -1,5 +1,7 @@
 package com.geowall;
 
+import com.geowall.domain.Wall;
+
 /**
  * Created by Sara on 17/04/2016.
  */
@@ -8,7 +10,18 @@ public class Constants {
     public static final String FIREBASE_URL ="https://geowallapp.firebaseio.com/";
     public static final String SHARED_PREFERENCES_NAME = PACKAGE_NAME + ".SHARED_PREFERENCES_NAME";
 
+    // Default Wall: Pisa Tower ,\m/
+    public static final Wall PISA = new Wall();
+    public static final float EPSILON = 10.0f;
+    public static final int PERMISSION_TO_ACCESS_FINE_LOCATION = 100;
 
+    static {
+        PISA.setId(new String("0"));
+        PISA.setLat(new Double(43.722920));
+        PISA.setLon(new Double(10.396631));
+        PISA.setName("Torre di Pisa");
+        PISA.setMsgCount(new Long(0));
+    }
     // GeoFencing constants
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
 

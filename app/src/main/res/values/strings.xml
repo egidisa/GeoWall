@@ -4,6 +4,7 @@
 
     <string name="password_hint">Password</string>
     <string name="email_hint">Email</string>
+    <string name="nickname_hint">Nickname</string>
     <string name="sign_up_button_label">Sign Up</string>
     <string name="signup_error_message">Please make sure you enter an email address and password!</string>
     <string name="signup_error_title">Error!</string>
@@ -11,7 +12,7 @@
     <string name="login_error_message">Please make sure you enter an email address and password!</string>
     <string name="login_error_title">Error!</string>
     <string name="login_button_label">Login</string>
-    <string name="sign_up_text">Sign Up!</string>
+    <string name="sign_up_text">No account yet? <u>Sign Up!</u></string>
     <string name="title_activity_login">Sign in</string>
     <string name="wall_title">insert a name</string>
     <string name="wall_radius">insert radius</string>
@@ -43,4 +44,6 @@
 
     <string name="geofence_transition_notification_text">Click notification to return to app</string>
     <string name="location_updated_message">Location updated</string>
+    <string name="title_activity_wall">WallActivity</string>
+
 </resources>

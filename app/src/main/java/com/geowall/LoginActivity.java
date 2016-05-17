@@ -1,9 +1,10 @@
 package com.geowall;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -11,12 +12,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.geowall.com.geowall.services.FirebaseManager;
+import com.firebase.client.ValueEventListener;
+import com.geowall.domain.UserInfo;
+import com.geowall.services.FirebaseManager;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -25,11 +28,18 @@ public class LoginActivity extends AppCompatActivity {
     protected EditText passwordEditText;
     protected Button loginButton;
     protected TextView signUpTextView;
+    String email;
+    String password;
+    String nickname;
+    SharedPreferences.Editor editor;
+    ArrayList<UserInfo> mUserList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        mUserList = new ArrayList<UserInfo>();
 
         signUpTextView = (TextView)findViewById(R.id.signUpText);
         emailEditText = (EditText)findViewById(R.id.emailField);
@@ -37,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = (Button)findViewById(R.id.loginButton);
 
         //firebase reference
-        final Firebase ref = FirebaseManager.getInstance();
+        final Firebase ref = FirebaseManager.getInstance().getRef();
 
         //opens new activity for sign up
         signUpTextView.setOnClickListener(new TextView.OnClickListener(){
@@ -48,13 +58,40 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        Firebase tempRef = new Firebase(Constants.FIREBASE_URL).child("users");
+        tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot ds) {
+                for(DataSnapshot snap : ds.getChildren()) {
+                    UserInfo u = snap.getValue(UserInfo.class);
+                    mUserList.add(u);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError e) { }
+        });
+
+        //SharedPreferences for saving login credentials
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+         editor = pref.edit();
+
+        email = emailEditText.getText().toString();
+        password = passwordEditText.getText().toString();
+
+
+            emailEditText.setText(pref.getString("KEY_USERNAME", null));
+            passwordEditText.setText(pref.getString("KEY_PASSWORD",null));
+
+
         //checks login credentials and opens new activity
         loginButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 Log.i(TAG, "BEGIN: loginButton.onClick()");
-                String email = emailEditText.getText().toString();
-                String password = passwordEditText.getText().toString();
+                email = emailEditText.getText().toString();
+                password = passwordEditText.getText().toString();
+
                 email.trim();
                 password.trim();
 
@@ -75,11 +112,26 @@ public class LoginActivity extends AppCompatActivity {
                         public void onAuthenticated(AuthData authData){
                             //auth successful
                             //if not initiated, finalizes user creation
-                            Map<String, Object> map = new HashMap<String, Object>();
-                            map.put("email", emailAddress);
+                            //Map<String, Object> map = new HashMap<String, Object>();
+                            //map.put("email", emailAddress);
                             //ref.child("users").child(authData.getUid()).setValue(map);
-                            ref.child("users").child(authData.getUid()).updateChildren(map);
+                            //ref.child("users").child(authData.getUid()).updateChildren(map);
 
+                            for(UserInfo u : mUserList){
+                                Log.i(TAG,"NICKNAME"+u.getNickname());
+                                if (u.getEmail().compareTo(email)==0 ){
+                                    nickname = u.getNickname();
+                                    editor.putString("KEY_NICKNAME", nickname);
+                                    ;
+                                }
+                            }
+
+                            editor.putString("KEY_NICKNAME", nickname);
+                            editor.putString("KEY_USERNAME", email);
+                            editor.putString("KEY_PASSWORD", password);
+                            Log.i(TAG,"ONCREATE:"+nickname);
+
+                            editor.commit(); // commit changes
 
                             Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -104,4 +156,16 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        editor.putString("KEY_USERNAME", email);
+        editor.putString("KEY_PASSWORD", password);
+        editor.putString("KEY_NICKNAME", nickname);
+        Log.i(TAG,"ONSTOP:"+nickname);
+
+    }
+
+
 }
