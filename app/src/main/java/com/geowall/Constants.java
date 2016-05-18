@@ -16,7 +16,7 @@ public class Constants {
     public static final int PERMISSION_TO_ACCESS_FINE_LOCATION = 100;
 
     static {
-        PISA.setId(new String("0"));
+        PISA.setId(new String("Torre di Pisa"));
         PISA.setLat(new Double(43.722920));
         PISA.setLon(new Double(10.396631));
         PISA.setName("Torre di Pisa");

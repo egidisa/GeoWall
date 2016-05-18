@@ -19,8 +19,12 @@ import android.widget.Toast;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ServerValue;
 import com.firebase.client.ValueEventListener;
 import com.geowall.domain.Message;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class WallActivity extends AppCompatActivity {
 
@@ -29,6 +33,7 @@ public class WallActivity extends AppCompatActivity {
     private MessageListAdapter mMessageListAdapter;
     ListView listView;
     String mUsername;
+    String timeStamp;
     Firebase mRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +81,8 @@ public class WallActivity extends AppCompatActivity {
                 super.onChanged();
                 Log.i(TAG,"DataChanged, listcnt: "+listView.getCount());
 
-                listView.setSelection(listView.getCount()-1);
+                listView.setSelection(listView.getCount());
+                listView.smoothScrollToPosition(listView.getCount());
 
             }
         });
@@ -114,11 +120,13 @@ public class WallActivity extends AppCompatActivity {
             msg.setUid(mUsername);
             msg.setContent(input);
             msg.setId("");
-            msg.setTimestamp("TODO");
+            timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
+            msg.setTimestamp( timeStamp);
             // Create a new, auto-generated child of that chat location, and save our chat data there
             mRef.push().setValue(msg);
             inputText.setText("");
-            listView.setSelection(listView.getCount()-1);
+            listView.setSelection(listView.getCount());
+            listView.smoothScrollToPosition(listView.getCount());
         }
     }
 }

@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -78,6 +79,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     protected HashMap<String, Wall> mWallMap;
     protected Map<Marker, String> markersMap;
+    protected Map<String, Marker> invertedMarkersMap;
+    protected List<Marker> enabledWalls;
     /**
      * Used when requesting to add geofences.
      */
@@ -107,33 +110,40 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "BEGIN:BroadcastReceiver.onReceive()");
             ArrayList<Geofence> triggeringGeofences = (ArrayList<Geofence>) intent.getSerializableExtra(GeofenceTransitionsIntentService.TRIGGERING_GEOFENCES);
-            HashMap<String, Marker> tmpMarkersMap = new HashMap<>();
-            Log.i(TAG, "onReceive():markersMap = " + markersMap.toString());
-            for (Marker m : markersMap.keySet()) {
-                tmpMarkersMap.put(markersMap.get(m), m);
-                Log.i(TAG, "onReceive(): m = " + m.toString());
-            }
+            // HashMap<String, Marker> tmpMarkersMap = new HashMap<>();
+            // Log.i(TAG, "onReceive():markersMap = " + markersMap.toString());
+            // for (Marker m : markersMap.keySet()) {
+                // tmpMarkersMap.put(markersMap.get(m), m);
+                // Log.i(TAG, "onReceive(): m = " + m.toString());
+            // }
 
-            Log.i(TAG, "onReceive():tmpMarkersMap = " + tmpMarkersMap.toString());
+            // Log.i(TAG, "onReceive():tmpMarkersMap = " + tmpMarkersMap.toString());
             if (triggeringGeofences != null && markersReady) {
-                //TODO: change markers accordingly
                 // Change markers icon of exited geofences to AZURE
                 if (intent.getIntExtra(GeofenceTransitionsIntentService.GEOFENCE_TRANSITION, 0) == Geofence.GEOFENCE_TRANSITION_EXIT) {
                     Log.i(TAG, "onReceive():Geofence exited, marker changed");
                     for (Geofence g : triggeringGeofences) {
-                        String markerId = g.getRequestId(); // = to wallId
-                        tmpMarkersMap.get(markerId).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+						String markerId = g.getRequestId(); // = wallId
+
+                        Marker m = invertedMarkersMap.get(markerId);
+                        m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.landmark_blue));
+                        boolean removeResult = enabledWalls.remove(m);
+                        Log.i(TAG, removeResult == true ? "onReceive():Wall disabled: " + mWallMap.get(markerId).getName() : "onReceive():Wall NOT disabled: " + mWallMap.get(markerId).getName());
                     }
                 }
-                // Change markers icon of exited geofences to GREEN
+                // Change markers icon of entered geofences to GREEN
                 else if (intent.getIntExtra(GeofenceTransitionsIntentService.GEOFENCE_TRANSITION, 0) == Geofence.GEOFENCE_TRANSITION_ENTER) {
                     Log.i(TAG, "onReceive():Geofence entered, marker changed");
                     Log.i(TAG, "onReceive(): triggeringGeofences = " + triggeringGeofences);
                     for (Geofence g : triggeringGeofences) {
                         String markerId = g.getRequestId(); // = to wallId
+						Marker m = invertedMarkersMap.get(markerId);
                         Log.i(TAG, "onReceive(): geofenceId = " + markerId);
-                        Log.i(TAG, "onReceive(): marker = " + tmpMarkersMap.get(markerId));
-                        tmpMarkersMap.get(markerId).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        Log.i(TAG, "onReceive(): marker = " + invertedMarkersMap.get(markerId));
+						
+						m.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.landmark_greent));
+						enabledWalls.add(m);
+						Log.i(TAG, enabledWalls.add(m) == true ? "onReceive():Wall enabled: " + mWallMap.get(markerId).getName() : "onReceive():Wall NOT enabled: " + mWallMap.get(markerId).getName());
                     }
                 } else
                     Log.e(TAG, "onReceive(): Unknown geofence transition");
@@ -156,6 +166,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mWallMap = new HashMap<>();
         // Empty map for storing markers
         markersMap = new HashMap<>();
+		// inverted map of markersMap
+        invertedMarkersMap = new HashMap<>();
+        //Set to store the walls that can be opened
+        enabledWalls = new ArrayList<>();
+        
         // Empty list for storing geofences.
         mGeofenceList = new ArrayList<Geofence>();
         // Initially set the PendingIntent used in addGeofences() and removeGeofences() to null.
@@ -184,17 +199,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO aprire dialog  per inserire nome e raggio (?)
                 createNewWall(mCurrentLocation);
-                //TODO alla conferma del dialog inserire nuovo landmark ed aprire la bacheca appena creata
-
-
                 //TODO se c'è già bacheca vicina non dovrebbe poterne inserire una nuova
                 Snackbar.make(view, "The is already a wall close to you!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
-
 
         // Kick off the request to build GoogleApiClient.
         buildGoogleApiClient();
@@ -463,23 +473,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             public void onInfoWindowClick(Marker marker) {
 
-                    String wallKey = null;
-                    String wallName = null;
-                    for (Wall w : mWallMap.values()) {
-                        if (w.getLat() == marker.getPosition().latitude && w.getLon() == marker.getPosition().longitude) {
-                            wallKey = w.getId();
-                            wallName = w.getName();
-                        }
-                    }
-                    //TODO deve partire intent solo se dentro wall
-                boolean wallEnabled = true;
-                if(wallEnabled) {
+                    String wallKey = markersMap.get(marker);
+                Log.i(TAG,"onInfoWindowClick():wallKey = " + wallKey);
+                Log.i(TAG,"onInfoWindowClick():marker = " + marker.toString());
+                Log.i(TAG,"onInfoWindowClick():mWallMap = " + mWallMap.toString());
+                String wallName = mWallMap.get(wallKey).getName();
+//                for (Wall w : mWallMap.values()) {
+//                    if (w.getLat() == marker.getPosition().latitude && w.getLon() == marker.getPosition().longitude) {
+//                        wallKey = w.getId();
+//                        wallName = w.getName();
+//                    }
+//                }
+                //TODO deve partire intent solo se dentro wall
+                Log.i(TAG,"seOnInfoWindowClickListener():enabledWalls = " + enabledWalls.toString());
+                boolean wallEnabled = enabledWalls.contains(marker);
+                if (wallEnabled) {
                     Intent intent = new Intent(MapsActivity.this, WallActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     intent.putExtra("EXTRA_WALL_KEY", wallKey);
                     intent.putExtra("EXTRA_WALL_NAME", wallName);
                     startActivity(intent);
+					
                 }else {
                     Toast.makeText(getApplicationContext(), "The selected wall is too far! Get closer to open it!", Toast.LENGTH_LONG).show();
                 }
@@ -576,14 +591,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Marker m = null;
         for (Wall w : mWallMap.values()) {
             LatLng temp = new LatLng(w.getLat(), w.getLon());
-            m = mMap.addMarker(new MarkerOptions().position(temp).title("Name: "+w.getName()).snippet("Tap here to open wall").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            m = mMap.addMarker(new MarkerOptions().position(temp).title("Name: "+w.getName()).snippet("Tap here to open wall").icon(BitmapDescriptorFactory.fromResource(R.drawable.landmark_accent)));
 
 
-            markersMap.put(m, w.getId().toString()); // TODO rimuovere il toString
+
+            markersMap.put(m, w.getId());
+            invertedMarkersMap.put(w.getId(), m);
             mMap.addCircle(new CircleOptions().center(temp).radius(Constants.GEOFENCE_RADIUS_IN_METERS).fillColor(0x3399ccff).strokeColor(0x556699ff).visible(true));
             markersReady = true;
         }
 
+		//remove the marker placeholder for "Torre di Pisa" hardcoded
+        invertedMarkersMap.get("Torre di Pisa").setVisible(false);
         Log.i(TAG, "END:displayWallMarkers()");
     }
 
@@ -685,8 +704,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mGeofenceList.add(new Geofence.Builder()
                             .setRequestId(ds.getKey())//TODO la key dovrà essere l'ID della wall
                             .setCircularRegion(
-
-
                                     w1.getLat(),
                                     w1.getLon(),
                                     Constants.GEOFENCE_RADIUS_IN_METERS
@@ -784,22 +801,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onLocationChanged(Location location) {
         Log.i(TAG, "BEGIN:onLocationChanged()");
         // update iff location changed more than Constants.EPSILON
+		Location lastLocation = mCurrentLocation;
         if (isLocationChanged(location)) {
             mCurrentLocation = location;
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
 
-
-            LatLng myLoc = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(myLoc)              // Sets the center of the map to Mountain View
-                    .zoom(15)                   // Sets the zoom
-                    .bearing(360)                // Sets the orientation of the camera to east
-                    .tilt(30)                   // Sets the tilt of the camera to 30 degrees
-                    .build();                   // Creates a CameraPosition from the builder
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-            Toast.makeText(this, getResources().getString(R.string.location_updated_message).concat(location.toString()),
+			if (lastLocation == null) {
+                LatLng myLoc = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(myLoc)              // Sets the center of the map to Mountain View
+                        .zoom(15)                   // Sets the zoom
+                        .bearing(360)                // Sets the orientation of the camera to east
+                        .tilt(30)                   // Sets the tilt of the camera to 30 degrees
+                        .build();                   // Creates a CameraPosition from the builder
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            }
+            Toast.makeText(this, getResources().getString(R.string.location_updated_message),
                     Toast.LENGTH_LONG).show();
-
 
         }
         Log.i(TAG, "END:onLocationChanged()");
@@ -809,11 +827,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         float distance = 0.0f;
         if (mCurrentLocation == null)
             return true;
-        distance = mCurrentLocation.distanceTo(location);
-        Log.i(TAG, "isLocationChanged():distance = " + distance);
-        if (distance < Constants.EPSILON)
-            return false;
-        return true;
+		else {
+            distance = mCurrentLocation.distanceTo(location);
+            Log.i(TAG, "isLocationChanged():distance = " + distance);
+            if (distance < Constants.EPSILON)
+                return false;
+            return true;
+        }
     }
 
     /**

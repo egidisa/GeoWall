@@ -40,56 +40,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             loadLoginView();
         }
-        //TODO - ci sono scritti i metodi per caricare e scaricare snapshot dal db
-        //itemsUrl = Constants.FIREBASE_URL+"/users/"+ mUserId + "/items";
-
-        //set up ListView
-        /*final ListView listView = (ListView)findViewById(R.id.listView);
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,android.R.id.text1);
-        listView.setAdapter(adapter);
-
-        // Add items via the Button and EditText at the bottom of the view.
-        final EditText text = (EditText) findViewById(R.id.todoText);
-        final Button button = (Button) findViewById(R.id.addButton);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                new Firebase(itemsUrl)
-                        .push()
-                        .child("title")
-                        .setValue(text.getText().toString());
-            }//qui gli si passa una stringa, ma si possono passare anche oggetti complessi
-        });
-
-        // Use Firebase to populate the list.
-        new Firebase(itemsUrl)
-                .addChildEventListener(new ChildEventListener() {
-                    //retrieve the data, called anytime new data is added to the firebase ref
-                    //listner receives snapshot of data, null if empty
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        adapter.add((String) dataSnapshot.child("title").getValue());
-                    }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                        adapter.remove((String) dataSnapshot.child("title").getValue());
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-
-                    }
-                });*/
     }
 
     @Override
