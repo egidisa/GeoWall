@@ -470,6 +470,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Log.i(TAG, "BEGIN:onMapReady()");
         mMap = googleMap;
+        //Disable Map Toolbar:
+        mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             public void onInfoWindowClick(Marker marker) {
 
