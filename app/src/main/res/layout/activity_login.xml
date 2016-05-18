@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:padding="10dp"
         android:background="@drawable/edittext_top"
-        android:drawableLeft="@android:drawable/sym_action_email"
+        android:drawableLeft="@drawable/emial_icon"
         android:ems="10"
         android:inputType="textEmailAddress"
         android:hint="@string/email_hint" >

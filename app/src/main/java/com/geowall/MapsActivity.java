@@ -100,6 +100,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean markersReady = false;
 
 
+
     private BroadcastReceiver receiver = new BroadcastReceiver() {
 
         @Override
@@ -461,18 +462,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             public void onInfoWindowClick(Marker marker) {
-                String wallKey = null;
-                for (Wall w : mWallMap.values()) {
-                    if (w.getLat() == marker.getPosition().latitude && w.getLon() == marker.getPosition().longitude)
-                        wallKey = w.getId();
+
+                    String wallKey = null;
+                    String wallName = null;
+                    for (Wall w : mWallMap.values()) {
+                        if (w.getLat() == marker.getPosition().latitude && w.getLon() == marker.getPosition().longitude) {
+                            wallKey = w.getId();
+                            wallName = w.getName();
+                        }
+                    }
+                    //TODO deve partire intent solo se dentro wall
+                boolean wallEnabled = true;
+                if(wallEnabled) {
+                    Intent intent = new Intent(MapsActivity.this, WallActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.putExtra("EXTRA_WALL_KEY", wallKey);
+                    intent.putExtra("EXTRA_WALL_NAME", wallName);
+                    startActivity(intent);
+                }else {
+                    Toast.makeText(getApplicationContext(), "The selected wall is too far! Get closer to open it!", Toast.LENGTH_LONG).show();
                 }
-                //Toast.makeText(getApplicationContext(), mWallList.toString(), Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(MapsActivity.this, WallActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("EXTRA_WALL_KEY", wallKey);
-                startActivity(intent);
-                //TODO show custom toast .get(0).getMessages().get(0).getText()
+
             }
         });
         //loadWalls();

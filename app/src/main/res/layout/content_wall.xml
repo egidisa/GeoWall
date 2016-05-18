@@ -14,7 +14,12 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/listFooter"
-        android:layout_alignParentTop="true"/>
+        android:layout_alignParentTop="true"
+        android:choiceMode="none"
+        android:focusable="true"
+        android:fadeScrollbars="false"
+
+        />
         <!--android:transcriptMode="alwaysScroll"-->
 
     <LinearLayout

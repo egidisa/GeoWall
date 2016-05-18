@@ -5,8 +5,10 @@ import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -22,17 +24,18 @@ import com.geowall.domain.Message;
 
 public class WallActivity extends AppCompatActivity {
 
+    private static final String TAG = WallActivity.class.getSimpleName();
     private ValueEventListener mConnectedListener;
     private MessageListAdapter mMessageListAdapter;
+    ListView listView;
     String mUsername;
     Firebase mRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wall);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        //TODO mettere username loggato, più facile metterlo direttamente in shared pref
+        setTitle(getIntent().getStringExtra("EXTRA_WALL_NAME"));
+        Log.i(TAG,"NAME_RECEIVED"+getIntent().getStringExtra("EXTRA_WALL_NAME"));
 
         SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
         mUsername = pref.getString("KEY_NICKNAME", null);
@@ -63,7 +66,7 @@ public class WallActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         // Setup our view and list adapter. Ensure it scrolls to the bottom as data changes
-        final ListView listView =  (ListView)findViewById(android.R.id.list);
+        listView =  (ListView)findViewById(android.R.id.list);
         // Tell our list adapter that we only want 50 messages at a time
         mMessageListAdapter = new MessageListAdapter(mRef.limit(50), this, R.layout.wall_message, mUsername);
         listView.setAdapter(mMessageListAdapter);
@@ -71,7 +74,10 @@ public class WallActivity extends AppCompatActivity {
             @Override
             public void onChanged() {
                 super.onChanged();
-                listView.setSelection(mMessageListAdapter.getCount() - 1);
+                Log.i(TAG,"DataChanged, listcnt: "+listView.getCount());
+
+                listView.setSelection(listView.getCount()-1);
+
             }
         });
 
@@ -112,6 +118,7 @@ public class WallActivity extends AppCompatActivity {
             // Create a new, auto-generated child of that chat location, and save our chat data there
             mRef.push().setValue(msg);
             inputText.setText("");
+            listView.setSelection(listView.getCount()-1);
         }
     }
 }

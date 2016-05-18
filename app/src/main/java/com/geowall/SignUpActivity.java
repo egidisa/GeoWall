@@ -55,7 +55,8 @@ public class SignUpActivity extends AppCompatActivity {
                 email = email.trim();
                 nickname = nickname.trim();
 
-                if (password.isEmpty() || email.isEmpty()|| nickname.isEmpty()) {
+                //Nickname may consist of only letters for now
+                if (password.isEmpty() || email.isEmpty()|| nickname.isEmpty() || !nickname.matches("[a-zA-Z]+")){
                     AlertDialog.Builder builder = new AlertDialog.Builder(SignUpActivity.this);
                     builder.setMessage(R.string.signup_error_message)
                             .setTitle(R.string.signup_error_title)
