@@ -6,3 +6,5 @@
 .DS_Store
 /build
 /captures
+pp/src/main/
+/app/src/main/AndroidManifest.xml
