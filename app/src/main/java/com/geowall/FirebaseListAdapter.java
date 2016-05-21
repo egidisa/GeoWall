@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -163,10 +165,21 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
+        ViewHolder holder = null;
         if (view == null) {
             view = mInflater.inflate(mLayout, viewGroup, false);
-        }
+            holder = new ViewHolder();
+            holder.timeTxt = (TextView)view.findViewById(R.id.timetxt);
+            holder.author = (TextView)view.findViewById(R.id.author);
+            holder.message = (TextView)view.findViewById(R.id.message);
+            holder.imgView = (ImageView)view.findViewById(R.id.imgView);
+            view.setTag(holder);
+            //holder.imgView.setTag();
 
+        } else {
+            holder = (ViewHolder) view.getTag();
+        }
+        holder.imgView.setImageDrawable(null);
         T model = mModels.get(i);
         // Call out to subclass to marshall this model into the provided view
         populateView(view, model);
@@ -186,5 +199,12 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
 
     public void setLayout(int layout){
         this.mLayout=layout;
+    }
+
+    public static class ViewHolder {
+        public TextView timeTxt;
+        public TextView message;
+        public TextView author;
+        public ImageView imgView;
     }
 }

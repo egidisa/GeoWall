@@ -489,7 +489,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //TODO deve partire intent solo se dentro wall
                 Log.i(TAG,"seOnInfoWindowClickListener():enabledWalls = " + enabledWalls.toString());
                 boolean wallEnabled = enabledWalls.contains(marker);
-                if (wallEnabled) {
+                //TODO togliere!!!! per debug solo!!!
+                if (wallEnabled) { //wallEnabled
                     Intent intent = new Intent(MapsActivity.this, WallActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

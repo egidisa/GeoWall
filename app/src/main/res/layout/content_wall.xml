@@ -12,7 +12,7 @@
     <ListView
         android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_above="@+id/listFooter"
         android:layout_alignParentTop="true"
         android:choiceMode="none"
@@ -39,10 +39,18 @@
             android:singleLine="true" />
 
         <ImageButton
-            android:id="@+id/sendButton"
+            android:id="@+id/imgButton"
+            android:background="#0000"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_send" />
+            android:src="@drawable/camera_icon" />
+
+        <ImageButton
+            android:id="@+id/sendButton"
+            android:background="#0000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/send_icon" />
     </LinearLayout>
 
 </RelativeLayout>

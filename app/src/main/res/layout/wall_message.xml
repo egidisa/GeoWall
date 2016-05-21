@@ -24,7 +24,7 @@
         android:layout_alignParentRight="true"
         android:gravity="right"
         android:textAlignment="gravity"
-        android:textColor="@color/material_grey_300" />
+        android:textColor="@color/dim_foreground_material_dark" />
 
 
     <TextView
@@ -33,6 +33,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/author"
         android:layout_marginLeft="5dp" />
+
+    <ImageView
+        android:id="@+id/imgView"
+        android:layout_width="wrap_content"
+        android:layout_below="@id/author"
+        android:layout_height="wrap_content" />
 
 </RelativeLayout>
 

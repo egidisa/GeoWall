@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "361976482887",
+    "firebase_url": "https://geowallapp.firebaseio.com",
+    "project_id": "geowallapp",
+    "storage_bucket": "geowallapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:361976482887:android:c5832189a9cebbcb",
+        "android_client_info": {
+          "package_name": "com.geowall"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "361976482887-o1jvvmpl4f55ssre1cr3frjl4l38afub.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "361976482887-vqaf9vgk2m34pmdgudct1eaj16ibg5fh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFn3Gqhr1sHq7ohk3i94SsaI3s7NMUKFg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
