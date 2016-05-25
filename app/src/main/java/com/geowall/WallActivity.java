@@ -96,7 +96,12 @@ public class WallActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Log.i(TAG,"buttonpressed");
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                //check if app available for taking pictures
+                if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                }else{
+                    //no app available
+                }
             }
         });
     }
@@ -112,10 +117,7 @@ public class WallActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // Setup our view and list adapter. Ensure it scrolls to the bottom as data changes
         listView = (ListView)findViewById(android.R.id.list);
-        // Tell our list adapter that we only want 50 messages at a time
-
         mMessageListAdapter = new MessageListAdapter(getApplicationContext(), mRef.limit(50), this, R.layout.wall_message, mUsername);
         listView.setAdapter(mMessageListAdapter);
         mMessageListAdapter.registerDataSetObserver(new DataSetObserver() {
