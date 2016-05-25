@@ -27,6 +27,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ServerValue;
 import com.firebase.client.ValueEventListener;
 import com.geowall.domain.Message;
+import com.geowall.services.FirebaseManager;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -51,6 +52,7 @@ public class WallActivity extends AppCompatActivity {
     Firebase mRef;
     EditText inputText;
     FirebaseStorage storage;
+    FirebaseManager fm;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -67,7 +69,9 @@ public class WallActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         String wallId = getIntent().getStringExtra("EXTRA_WALL_KEY");
-        mRef = new Firebase(Constants.FIREBASE_URL).child("walls").child(wallId).child("messages");
+        fm = FirebaseManager.getInstance();
+        mRef = fm.getRef().child("walls").child(wallId).child("messages");
+        //mRef = new Firebase(Constants.FIREBASE_URL).child("walls").child(wallId).child("messages");
 
         EditText inputText = (EditText) findViewById(R.id.messageInput);
         inputText.setOnEditorActionListener(new TextView.OnEditorActionListener() {

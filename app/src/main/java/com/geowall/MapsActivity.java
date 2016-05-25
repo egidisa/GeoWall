@@ -819,8 +819,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .build();                   // Creates a CameraPosition from the builder
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             }
-            Toast.makeText(this, getResources().getString(R.string.location_updated_message),
-                    Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, getResources().getString(R.string.location_updated_message) Toast.LENGTH_LONG).show();
 
         }
         Log.i(TAG, "END:onLocationChanged()");
