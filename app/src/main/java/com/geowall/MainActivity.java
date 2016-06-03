@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Firebase mRef;
     private String mUserId;
-    private String itemsUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

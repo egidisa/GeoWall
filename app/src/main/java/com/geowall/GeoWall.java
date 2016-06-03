@@ -6,9 +6,6 @@ import android.support.multidex.MultiDex;
 
 import com.firebase.client.Firebase;
 
-/**
- * Created by Sara on 17/04/2016.
- */
 public class GeoWall extends Application {
     @Override
     public void onCreate(){
@@ -19,6 +16,8 @@ public class GeoWall extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+
+        //needed for larger apks
         MultiDex.install(this);
     }
 
