@@ -1,30 +1,24 @@
 package com.geowall;
 
-import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.ServerValue;
 import com.firebase.client.ValueEventListener;
 import com.geowall.domain.Message;
 import com.geowall.services.FirebaseManager;
@@ -39,6 +33,12 @@ import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * @author sara
+ *
+ * This activity shows the contents of a wall. It also handles the update of the image taken from
+ * the camera.
+ */
 public class WallActivity extends AppCompatActivity {
 
     private static final int CAMERA_REQUEST = 1888;
@@ -52,12 +52,11 @@ public class WallActivity extends AppCompatActivity {
     Firebase mRef;
     EditText inputText;
     FirebaseStorage storage;
+    String mCurrentPhotoPath;
     FirebaseManager fm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReferenceFromUrl("gs://geowallapp.appspot.com/").child("images");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wall);
@@ -69,10 +68,9 @@ public class WallActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         String wallId = getIntent().getStringExtra("EXTRA_WALL_KEY");
+        storage = FirebaseStorage.getInstance();
         fm = FirebaseManager.getInstance();
         mRef = fm.getRef().child("walls").child(wallId).child("messages");
-        //mRef = new Firebase(Constants.FIREBASE_URL).child("walls").child(wallId).child("messages");
-
         EditText inputText = (EditText) findViewById(R.id.messageInput);
         inputText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -109,7 +107,7 @@ public class WallActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
-            String name = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());;
+            String name = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             sendPhoto(photo,name);
         }
     }
@@ -132,15 +130,17 @@ public class WallActivity extends AppCompatActivity {
             }
         });
 
-        // Finally, a little indication of connection status
+        // Indication of connection status
         mConnectedListener = mRef.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean connected = (Boolean) dataSnapshot.getValue();
                 if (connected) {
-                    Toast.makeText(WallActivity.this, "Connected to Firebase", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG,"onStart():onDataChange():Connected to Firebase");
+                    //Toast.makeText(WallActivity.this, "Connected to Firebase", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(WallActivity.this, "Disconnected from Firebase", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG,"onStart():onDataChange():Disconnected to Firebase");
+                    //Toast.makeText(WallActivity.this, "Disconnected from Firebase", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -150,6 +150,9 @@ public class WallActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * On activity stop, remove eventlistener on connect and clean leastview
+     */
     @Override
     public void onStop() {
         super.onStop();
@@ -157,6 +160,11 @@ public class WallActivity extends AppCompatActivity {
         mMessageListAdapter.cleanup();
     }
 
+    /**
+     * Send a text to the firebase db. An unique identifier is created on the basis of datetime
+     * and firebase will manage possible collisions on files updated     *
+     *
+    */
     private void sendMessage() {
         EditText inputText = (EditText) findViewById(R.id.messageInput);
         String input = inputText.getText().toString();
@@ -167,7 +175,8 @@ public class WallActivity extends AppCompatActivity {
             msg.setId("");
             timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
             msg.setTimestamp( timeStamp);
-            // Create a new, auto-generated child of that chat location, and save our chat data there
+
+            // Create a new, auto-generated child of that chat location, and save msg
             mRef.push().setValue(msg);
             inputText.setText("");
             listView.setSelection(listView.getCount());
@@ -175,6 +184,9 @@ public class WallActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     *
+     * */
     private void sendPhoto(Bitmap pic, String name) {
         inputText = (EditText) findViewById(R.id.messageInput);
         String input = inputText.getText().toString();

@@ -2,53 +2,30 @@ package com.geowall;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.client.Query;
-
-import com.geowall.FirebaseListAdapter;
-import com.geowall.R;
 import com.geowall.domain.Message;
-import com.google.android.gms.ads.formats.NativeAd;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
-
-import java.io.InputStream;
 
 
 /**
- * @author greg
- * @since 6/21/13
- *
- * This class is an example of how to use FirebaseListAdapter. It uses the <code>Chat</code> class to encapsulate the
+ * @author sara
+ * This class uses FirebaseListAdapter. It uses the <code>Mesage</code> class to encapsulate the
  * data for each individual chat message
  */
 public class MessageListAdapter extends FirebaseListAdapter<Message> {
 
-    // The mUsername for this client. We use this to indicate which messages originated from this user
+    // The mUsername for this client. Used to indicate which messages originated from this user
     private String mUsername;
-    private String timeStamp;
     String url;
     private Context context;
     FirebaseStorage storage;
-    StorageReference storageRef;
     ImageView imgView;
     Activity a;
 
@@ -62,70 +39,55 @@ public class MessageListAdapter extends FirebaseListAdapter<Message> {
     }
 
     /**
-     * Bind an instance of the <code>Chat</code> class to our view. This method is called by <code>FirebaseListAdapter</code>
+     * Bind an instance of the <code>Message</code> class to the list view. This method is called by <code>FirebaseListAdapter</code>
      * when there is a data change, and we are given an instance of a View that corresponds to the layout that we passed
      * to the constructor, as well as a single <code>Chat</code> instance that represents the current data to bind.
      *
      * @param view A view instance corresponding to the layout we passed to the constructor.
-     * @param msg An instance representing the current state of a chat message
+     * @param msg  An instance representing the current state of a chat message
      */
-
-
     @Override
     protected void populateView(View view, Message msg) {
-        Log.i(TAG,"POPULATEVIEW");
-        // Map a Chat object to an entry in our listview
-        storage = FirebaseStorage.getInstance();
+        Log.i(TAG, "POPULATEVIEW");
+        // map a Chat object to an entry in our listview
 
+        storage = FirebaseStorage.getInstance();
         String author = msg.getUid();
         String time = msg.getTimestamp();
         TextView authorText = (TextView) view.findViewById(R.id.author);
         TextView timeText = (TextView) view.findViewById(R.id.timetxt);
         imgView = (ImageView) view.findViewById(R.id.imgView);
-        authorText.setText(author+" ");
+        imgView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "Clicked");
+            }
+        });
+
+        authorText.setText(author + " ");
         timeText.setText(time);
         // If the message was sent by this user, color it differently
         if (author != null && author.equals(mUsername)) {
             authorText.setTextColor(Color.RED);
-            //TODO change this message layout, not just color
+            //TODO change this message layout to be like telegram's bubbles
         } else {
             authorText.setTextColor(Color.BLUE);
 
         }
-        Log.i(TAG, "URLMSG : "+msg.getText());
+        Log.i(TAG, "URLMSG : " + msg.getText());
         if (msg.getText().startsWith("https://firebasestorage.googleapis.com/v0/b/geowallapp.appspot.com/o/")) {
-            Log.i(TAG, "ENTERER_IFIMGVIEW : "+msg.getText());
+            //message is an image
+            Log.i(TAG, "ENTERER_IFIMGVIEW : " + msg.getText());
             ((TextView) view.findViewById(R.id.message)).setText("");
+            //fill imageView
             Picasso.with(context)
                     .load(msg.getText())
                     .placeholder(R.drawable.placeholder)
                     .into(imgView);
-            /*storageRef = storage.getReferenceFromUrl(msg.getText()); //it can be either a http or a gs
-            Log.i(TAG, "ENTERER_IFIMGVIEW : "+msg.getId());
-            Log.i(TAG, "URLMSG : "+msg.getText());
-            storageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                @Override
-                public void onSuccess(Uri uri) {
-                    url = uri.toString();
-                    Log.i(TAG, "URL : "+url);
-                    Picasso.with(context)
-                            .load(url)
-                            .into(imgView);
-
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(Exception e) {
-                    Log.i(TAG, "ERORR : "+e);
-                }
-            });*/
-
-
-        }else{
+        } else {
+            //message is just text
             ((TextView) view.findViewById(R.id.message)).setText(msg.getText());
         }
-        //todo, if image node present
-
     }
 
 

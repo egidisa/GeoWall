@@ -18,8 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author greg
- * @since 6/21/13
+ * @author sara
  *
  * This class is a generic way of backing an Android ListView with a Firebase location.
  * It handles all of the child events at the given Firebase location. It marshals received data into the given
@@ -163,6 +162,14 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
         return i;
     }
 
+    /**
+     * The adapters are built to reuse Views, when a View is scrolled so that is no longer visible,
+     * it can be used for one of the new Views appearing. This reused is "view".
+     * If this is null it means that there is no recycled View and we have to create a new one,
+     * otherwise we should use it to avoid creating a new.
+     * Needed since imageviews in messages would retain images when scrolling.
+     * <p/>
+     */
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder holder = null;
@@ -174,8 +181,6 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
             holder.message = (TextView)view.findViewById(R.id.message);
             holder.imgView = (ImageView)view.findViewById(R.id.imgView);
             view.setTag(holder);
-            //holder.imgView.setTag();
-
         } else {
             holder = (ViewHolder) view.getTag();
         }
@@ -190,7 +195,6 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
      * Each time the data at the given Firebase location changes, this method will be called for each item that needs
      * to be displayed. The arguments correspond to the mLayout and mModelClass given to the constructor of this class.
      * <p/>
-     * Your implementation should populate the view using the data contained in the model.
      *
      * @param v     The view to populate
      * @param model The object containing the data used to populate the view

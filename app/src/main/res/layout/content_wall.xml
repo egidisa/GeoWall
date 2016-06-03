@@ -18,9 +18,7 @@
         android:choiceMode="none"
         android:focusable="true"
         android:fadeScrollbars="false"
-
         />
-        <!--android:transcriptMode="alwaysScroll"-->
 
     <LinearLayout
         android:id="@+id/listFooter"

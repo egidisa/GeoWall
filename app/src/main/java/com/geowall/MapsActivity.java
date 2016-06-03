@@ -98,7 +98,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // Firebase references
     FirebaseManager fm;
     private Firebase mRef;
-    private GeoFire geoFire;
+    //private GeoFire geoFire;
     private boolean geofencingActive = false;
     private boolean markersReady = false;
 
@@ -180,7 +180,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         fm = FirebaseManager.getInstance();
         mRef = fm.getRef();
-        geoFire = new GeoFire(mRef);
+        //geoFire = new GeoFire(mRef);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -201,7 +201,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 createNewWall(mCurrentLocation);
                 //TODO se c'è già bacheca vicina non dovrebbe poterne inserire una nuova
-                Snackbar.make(view, "The is already a wall close to you!", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "There is already a wall close to you!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
