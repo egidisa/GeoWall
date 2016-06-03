@@ -3,7 +3,7 @@ package com.geowall;
 import com.geowall.domain.Wall;
 
 /**
- * Created by Sara on 17/04/2016.
+ * Defines all the constants used in the application.
  */
 public class Constants {
     public static final String PACKAGE_NAME = "com.geowall";
@@ -22,6 +22,7 @@ public class Constants {
         PISA.setName("Torre di Pisa");
         PISA.setMsgCount(new Long(0));
     }
+    
     // GeoFencing constants
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
 
