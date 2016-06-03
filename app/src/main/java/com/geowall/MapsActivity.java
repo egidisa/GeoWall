@@ -72,18 +72,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // Google API
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-    /**
-     * The list of geofences used for walls.
-     */
+    
+    // List of geofences used for walls.
     protected List<Geofence> mGeofenceList;
 
+    // Maps for indexing walls to their IDS, markers to their IDs and viceversa
     protected HashMap<String, Wall> mWallMap;
     protected Map<Marker, String> markersMap;
     protected Map<String, Marker> invertedMarkersMap;
+    
+    // List of enabled walls by geofencing, i.e. walls whose geofence is currently "ENTERED"
     protected List<Marker> enabledWalls;
-    /**
-     * Used when requesting to add geofences.
-     */
+    
+    // Used when requesting to add geofences.
     private PendingIntent mGeofencePendingIntent;
     protected LocationRequest mLocationRequest;
 
@@ -91,33 +92,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Location mCurrentLocation;
     private String mLastUpdateTime;
 
-
     public static Toast wallInfoToast;
-
 
     // Firebase references
     FirebaseManager fm;
     private Firebase mRef;
-    //private GeoFire geoFire;
+    
+    // Useful variables for some status checks
     private boolean geofencingActive = false;
     private boolean markersReady = false;
 
-
-
+    // Broadcast receiver to receive intent from GeofenceTransitionsIntentService 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "BEGIN:BroadcastReceiver.onReceive()");
             ArrayList<Geofence> triggeringGeofences = (ArrayList<Geofence>) intent.getSerializableExtra(GeofenceTransitionsIntentService.TRIGGERING_GEOFENCES);
-            // HashMap<String, Marker> tmpMarkersMap = new HashMap<>();
-            // Log.i(TAG, "onReceive():markersMap = " + markersMap.toString());
-            // for (Marker m : markersMap.keySet()) {
-                // tmpMarkersMap.put(markersMap.get(m), m);
-                // Log.i(TAG, "onReceive(): m = " + m.toString());
-            // }
-
-            // Log.i(TAG, "onReceive():tmpMarkersMap = " + tmpMarkersMap.toString());
+            
             if (triggeringGeofences != null && markersReady) {
                 // Change markers icon of exited geofences to AZURE
                 if (intent.getIntExtra(GeofenceTransitionsIntentService.GEOFENCE_TRANSITION, 0) == Geofence.GEOFENCE_TRANSITION_EXIT) {
@@ -155,6 +147,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     };
 
 
+    // MapsActivity onCreate()
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "BEGIN:onCreate()");
@@ -162,25 +155,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
 
         // Empty map for storing walls data
-
         mWallMap = new HashMap<>();
+        
         // Empty map for storing markers
         markersMap = new HashMap<>();
-		// inverted map of markersMap
+	
+	// inverted map of markersMap
         invertedMarkersMap = new HashMap<>();
+        
         //Set to store the walls that can be opened
         enabledWalls = new ArrayList<>();
         
         // Empty list for storing geofences.
         mGeofenceList = new ArrayList<Geofence>();
+        
         // Initially set the PendingIntent used in addGeofences() and removeGeofences() to null.
         mGeofencePendingIntent = null;
         mCurrentLocation = null;
 
-
         fm = FirebaseManager.getInstance();
         mRef = fm.getRef();
-        //geoFire = new GeoFire(mRef);
+        
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -188,19 +183,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //load walls from Firebase
         loadWalls();
+        
         Log.i(TAG, "Walls loaded:" + mWallMap.toString());
 
-        // Set the geofences used.
-        //populateGeofenceList();
-        // Log.i(TAG, "Geofence list loaded");
-        // getLocation();
-        //fab definition
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 createNewWall(mCurrentLocation);
-                //TODO se c'è già bacheca vicina non dovrebbe poterne inserire una nuova
                 Snackbar.make(view, "There is already a wall close to you!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
@@ -211,7 +201,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.i(TAG, "onCreate():mWallMap = " + mWallMap.toString());
         Log.i(TAG, "onCreate():mGeofenceList = " + mGeofenceList.toString());
         Log.i(TAG, "END:onCreate()");
-
     }
 
     /**
@@ -229,6 +218,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.i(TAG, "END:buildGoogleApiClient()");
     }
 
+    /**
+     *  Builds a LocationRequest.
+     */
     protected void createLocationRequest() {
         Log.i(TAG, "BEGIN:createLocationRequest()");
         mLocationRequest = new LocationRequest();
@@ -247,11 +239,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.i(TAG, "END:createLocationRequest()");
     }
 
+    /**
+     * This method sends a request for location updates to the LocationServices API. The permissions check is compliant with
+     * the API level 23. By requesting the location updates, the MapsActivity is set as LocationListener to receive them.
+     */
     protected void startLocationUpdates() {
         Log.i(TAG, "BEGIN:startLocationUpdates()");
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
 
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -260,15 +255,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.i(TAG, "startLocationUpdates(): PERMISSIONS TO ACCESS_FINE_LOCATION not granted!");
             return;
         }
-        // The final argument to {@code requestLocationUpdates()} is a LocationListener
-        // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
-
+       
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
         Log.i(TAG, "END:startLocationUpdates()");
     }
 
-    // method used to handle properly the permissions requested to the user
+    /** 
+     * This method handles properly the user response to the permission request for ACCESS_FINE_LOCATION. Location updates are
+     * started if permission is granted.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Log.i(TAG, "BEGIN:onRequestPermissionsResult()");
@@ -281,9 +277,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     startLocationUpdates();
                 } else {
-                    //TODO
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    Toast.makeText(getApplicationContext(), "Dear user, please consider to grant me access to fine location, I'll deliver you the best experience.", Toast.LENGTH_LONG).show();
                 }
                 return;
             }
@@ -359,68 +353,42 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    // onStart dell'Activity
+    // MapsActivity onStart()
     @Override
     protected void onStart() {
         Log.i(TAG, "BEGIN:onStart()");
+        
         super.onStart();
         mGoogleApiClient.connect();
-//        // ATTENTION: This was auto-generated to implement the App Indexing API.
-//        // See https://g.co/AppIndexing/AndroidStudio for more information.
-//        Action viewAction = Action.newAction(
-//                Action.TYPE_VIEW, // TODO: choose an action type.
-//                "Maps Page", // TODO: Define a title for the content shown.
-//                // TODO: If you have web page content that matches this app activity's content,
-//                // make sure this auto-generated web page URL is correct.
-//                // Otherwise, set the URL to null.
-//                Uri.parse("http://host/path"),
-//                // TODO: Make sure this auto-generated app URL is correct.
-//                Uri.parse("android-app://com.geowall/http/host/path")
-//        );
-//        AppIndex.AppIndexApi.start(mGoogleApiClient, viewAction);
-        Log.i(TAG, "onStart():mWallMap = " + mWallMap.toString());
-        Log.i(TAG, "onStart():mGeofenceList = " + mGeofenceList.toString());
-
+        
         Log.i(TAG, "END:onStart()");
     }
 
+    // MapsActivity onStop()
     @Override
     protected void onStop() {
         Log.i(TAG, "BEGIN:onStop()");
+
         super.onStop();
-
-
-        Log.i(TAG, "onStop():mWallMap = " + mWallMap.toString());
-        Log.i(TAG, "onStop():mGeofenceList = " + mGeofenceList.toString());
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Maps Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app URL is correct.
-                Uri.parse("android-app://com.geowall/http/host/path")
-        );
+        Action viewAction = Action.newAction(Action.TYPE_VIEW, "Maps Page", Uri.parse("http://host/path"),
+        Uri.parse("android-app://com.geowall/http/host/path"));
         AppIndex.AppIndexApi.end(mGoogleApiClient, viewAction);
         if (mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
         mGoogleApiClient.disconnect();
+        
         Log.i(TAG, "END:onStop()");
     }
-
+    
+    // MapsActivity onResume(): re-register the BroadcastReceiver to receive the intents from GeofenceTransitionsIntentService.
     @Override
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter(GeofenceTransitionsIntentService.NOTIFICATION));
     }
 
+    // MapsActivity onPause(): un-register the BroadcastReceiver.
     @Override
     protected void onPause() {
         super.onPause();
@@ -433,9 +401,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.i(TAG, "Connected to GoogleApiClient");
-        Log.i(TAG, "onConnected():mWallMap = " + mWallMap.toString());
-        Log.i(TAG, "onConnected():mGeofenceList" + mGeofenceList.toString());
-
+        
         createLocationRequest();
         startLocationUpdates();
         connectGeofences();
@@ -470,6 +436,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Log.i(TAG, "BEGIN:onMapReady()");
         mMap = googleMap;
+        
         //Disable Map Toolbar:
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
@@ -480,15 +447,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.i(TAG,"onInfoWindowClick():marker = " + marker.toString());
                 Log.i(TAG,"onInfoWindowClick():mWallMap = " + mWallMap.toString());
                 String wallName = mWallMap.get(wallKey).getName();
-//                for (Wall w : mWallMap.values()) {
-//                    if (w.getLat() == marker.getPosition().latitude && w.getLon() == marker.getPosition().longitude) {
-//                        wallKey = w.getId();
-//                        wallName = w.getName();
-//                    }
-//                }
-                //TODO deve partire intent solo se dentro wall
-                Log.i(TAG,"seOnInfoWindowClickListener():enabledWalls = " + enabledWalls.toString());
-                boolean wallEnabled = enabledWalls.contains(marker);
+		
+		boolean wallEnabled = enabledWalls.contains(marker);
                 //TODO togliere!!!! per debug solo!!!
                 if (wallEnabled) { //wallEnabled
                     Intent intent = new Intent(MapsActivity.this, WallActivity.class);
@@ -504,65 +464,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-        //loadWalls();
-        //Log.i(TAG, "loadWallFinished" + wallsLoaded);
-        //populateGeofenceList();
-        // Provides a simple way of getting a device's location and is well suited for
-        // applications that do not require a fine-grained location and that do not need location
-        // updates. Gets the best and most recent location currently available, which may be null
-        // in rare cases when a location is not available.
+        
+        // Check permissions to access location.
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        	Toast.makeText(getApplicationContext(), "Dear user, please consider to grant me access to fine location, I'll deliver you the best experience.", Toast.LENGTH_LONG).show();
             return;
         }
 
         // Show user position on map, with blue marker and circle
         mMap.setMyLocationEnabled(true);
 
-        //set initial position as the current one
-        //displayWalls();
         Log.i(TAG, "END:onMapReady()");
     }
-
+    
+    /**
+     * Activates geofencing by sending a request to add geofences to the Geofencing API.
+     */
     public void connectGeofences() {
         Log.i(TAG, "BEGIN:connectGeofences()");
 
-        Log.i(TAG, "connectGeofences():mWallMap = " + mWallMap.toString());
-        Log.i(TAG, "connectGeofences():mGeofenceList = " + mGeofenceList.toString());
-        // TODO: check if correct; for now, first remove the old geofences
-//        if(geofencingActive)
-//        {
-//            try {
-//                LocationServices.GeofencingApi.removeGeofences(
-//                        mGoogleApiClient,
-//                        // A pending intent that that is reused when calling removeGeofences(). This
-//                        // pending intent is used to generate an intent when a matched geofence
-//                        // transition is observed.
-//                        getGeofencePendingIntent()
-//                ).setResultCallback(this); // Result processed in onResult().
-//                geofencingActive = true;
-//
-//            } catch (SecurityException securityException) {
-//                // Catch exception generated if the app does not use ACCESS_FINE_LOCATION permission.
-//                logSecurityException(securityException);
-//            } catch (IllegalStateException ise){
-//                Log.e(TAG,"Error during geofences activation.");
-//                Log.e(TAG,ise.getMessage());
-//            }
-//        }
-//        else
         try {
             LocationServices.GeofencingApi.addGeofences(
                     mGoogleApiClient,
                     // The GeofenceRequest object.
                     getGeofencingRequest(),
-                    // A pending intent that that is reused when calling removeGeofences(). This
+                    // A pending intent that is reused when calling removeGeofences(). This
                     // pending intent is used to generate an intent when a matched geofence
                     // transition is observed.
                     getGeofencePendingIntent()
@@ -576,10 +502,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.e(TAG, "Error during geofences activation.");
             Log.e(TAG, ise.getMessage());
         }
+        
         Log.i(TAG, "END:connectGeofences()");
     }
 
-
+    /**
+     * Displays a single Wall marker on the map. Not used yet.
+     */
     private void displayWallMarker(Wall w) {
         Log.i(TAG, "BEGIN:displayWallMarker()");
         LatLng temp = new LatLng(w.getLat(), w.getLon());
@@ -589,6 +518,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.i(TAG, "END:displayWallMarker()");
     }
 
+
+    /**
+     * Displays walls markers on the map.
+     */
     private void displayWallsMarkers() {
         Log.i(TAG, "BEGIN:displayWallMarkers()");
         Marker m = null;
@@ -606,6 +539,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 		//remove the marker placeholder for "Torre di Pisa" hardcoded
         invertedMarkersMap.get("Torre di Pisa").setVisible(false);
+        
         Log.i(TAG, "END:displayWallMarkers()");
     }
 
@@ -645,9 +579,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
+    /**
+     * Retrieves walls data from firebase and populates mWallMap and mGeofenceList. A default hardcoded wall is loaded to avoid
+     * anomalies due to the asynchronous receive of the data from Firebase.
+     */
     private void loadWalls() {
         Log.i(TAG, "BEGIN:loadWalls()");
-        //First load: default constant wall
+        //First load: default constant wall; will be removed later, in displayWallsMarkers().
         Wall pisa = Constants.PISA;
         mWallMap.put(Constants.PISA.getName(), Constants.PISA);
         mGeofenceList.add(new Geofence.Builder()
@@ -737,7 +675,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
 
-            //
+           
             @Override
             public void onCancelled(FirebaseError firebaseError) {
             }
@@ -786,7 +724,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
 
 
-        // mappa da passare solo per visualizzare il nome della wall associato al suo ID che viene scritto nella geofenceRequest
+        // Map passed within the intent just to write in the notification the name of the wall instead of the ID.
         HashMap<String, String> tmpWallMap = new HashMap<String, String>();
         for (String k : mWallMap.keySet()) {
             tmpWallMap.put(k, mWallMap.get(k).getName());
@@ -800,6 +738,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
+    /**
+     * Receives location changes and eventually updates the current location.
+     */
     @Override
     public void onLocationChanged(Location location) {
         Log.i(TAG, "BEGIN:onLocationChanged()");
@@ -819,12 +760,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .build();                   // Creates a CameraPosition from the builder
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             }
-            //Toast.makeText(this, getResources().getString(R.string.location_updated_message) Toast.LENGTH_LONG).show();
-
+            
         }
         Log.i(TAG, "END:onLocationChanged()");
     }
 
+    /**
+     * Checks if location has changed enough to consider updating the current location. A radius of 10 meters is used (EPSILON).
+     */
     private boolean isLocationChanged(Location location) {
         float distance = 0.0f;
         if (mCurrentLocation == null)
@@ -841,9 +784,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * Runs when the result of calling addGeofences() and removeGeofences() becomes available.
      * Either method can complete successfully or with an error.
-     * <p/>
-     * <p/>
-     * <p/>
+     *
      * Since this activity implements the {@link ResultCallback} interface, we are required to
      * define this method.
      *
@@ -851,25 +792,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      *               removeGeofences() get called.
      */
     public void onResult(Status status) {
-
         Log.i(TAG, "BEGIN:onResult()");
         if (status.isSuccess()) {
-//            // Update state and save in shared preferences.
-//            mGeofencesAdded = !mGeofencesAdded;
-//            SharedPreferences.Editor editor = mSharedPreferences.edit();
-//            //editor.putBoolean(Constants.GEOFENCES_ADDED_KEY, mGeofencesAdded);
-//            //editor.apply();
-//
-//            // Update the UI. Adding geofences enables the Remove Geofences button, and removing
-//            // geofences enables the Add Geofences button.
-//            setButtonsEnabledState();
-//
-//            Toast.makeText(
-//                    this,
-//                    getString(mGeofencesAdded ? R.string.geofences_added :
-//                            R.string.geofences_removed),
-//                    Toast.LENGTH_SHORT
-//            ).show();
+        	
         } else {
             // Get the status code for the error and log it using a user-friendly message.
             String errorMessage = GeofenceErrorMessages.getErrorString(this,
