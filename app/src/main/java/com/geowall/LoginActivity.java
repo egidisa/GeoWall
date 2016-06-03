@@ -28,6 +28,7 @@ public class LoginActivity extends AppCompatActivity {
     protected EditText passwordEditText;
     protected Button loginButton;
     protected TextView signUpTextView;
+
     String email;
     String password;
     String nickname;
@@ -58,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        //retrieve user list
         Firebase tempRef = new Firebase(Constants.FIREBASE_URL).child("users");
         tempRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -67,24 +69,21 @@ public class LoginActivity extends AppCompatActivity {
                     mUserList.add(u);
                 }
             }
-
             @Override
             public void onCancelled(FirebaseError e) { }
         });
 
         //SharedPreferences for saving login credentials
         SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
-         editor = pref.edit();
+        editor = pref.edit();
 
         email = emailEditText.getText().toString();
         password = passwordEditText.getText().toString();
+        emailEditText.setText(pref.getString("KEY_USERNAME", null));
+        passwordEditText.setText(pref.getString("KEY_PASSWORD",null));
 
 
-            emailEditText.setText(pref.getString("KEY_USERNAME", null));
-            passwordEditText.setText(pref.getString("KEY_PASSWORD",null));
-
-
-        //checks login credentials and opens new activity
+        //checks login credentials and opens new activity on login success
         loginButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -110,19 +109,13 @@ public class LoginActivity extends AppCompatActivity {
 
                         @Override
                         public void onAuthenticated(AuthData authData){
-                            //auth successful
-                            //if not initiated, finalizes user creation
-                            //Map<String, Object> map = new HashMap<String, Object>();
-                            //map.put("email", emailAddress);
-                            //ref.child("users").child(authData.getUid()).setValue(map);
-                            //ref.child("users").child(authData.getUid()).updateChildren(map);
 
+                            //auth successful
                             for(UserInfo u : mUserList){
                                 Log.i(TAG,"NICKNAME"+u.getNickname());
                                 if (u.getEmail().compareTo(email)==0 ){
                                     nickname = u.getNickname();
                                     editor.putString("KEY_NICKNAME", nickname);
-                                    ;
                                 }
                             }
 
@@ -150,13 +143,15 @@ public class LoginActivity extends AppCompatActivity {
                             dialog.show();
                         }
                     });
-
                 }
                 Log.i(TAG, "END: loginButton.onClick()");
             }
         });
     }
 
+    /**
+     * When activity stops, saves the credential in shared preferences
+     */
     @Override
     protected void onStop() {
         super.onStop();

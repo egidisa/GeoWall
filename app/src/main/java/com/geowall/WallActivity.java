@@ -34,8 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * @author sara
- *
  * This activity shows the contents of a wall. It also handles the update of the image taken from
  * the camera.
  */
@@ -52,7 +50,6 @@ public class WallActivity extends AppCompatActivity {
     Firebase mRef;
     EditText inputText;
     FirebaseStorage storage;
-    String mCurrentPhotoPath;
     FirebaseManager fm;
 
     @Override
@@ -63,15 +60,21 @@ public class WallActivity extends AppCompatActivity {
         setTitle(getIntent().getStringExtra("EXTRA_WALL_NAME"));
         Log.i(TAG,"NAME_RECEIVED"+getIntent().getStringExtra("EXTRA_WALL_NAME"));
 
+        //get shared preferences to obtain user's nickname
         SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0);
         mUsername = pref.getString("KEY_NICKNAME", null);
+
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
+        //get wall id from intent
         String wallId = getIntent().getStringExtra("EXTRA_WALL_KEY");
+
+        //get firebase reference to the selected wall's messages
         storage = FirebaseStorage.getInstance();
         fm = FirebaseManager.getInstance();
         mRef = fm.getRef().child("walls").child(wallId).child("messages");
         EditText inputText = (EditText) findViewById(R.id.messageInput);
+
         inputText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -104,6 +107,12 @@ public class WallActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * handle camera intent result
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
@@ -112,6 +121,9 @@ public class WallActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * On activity start binds listview to adapter
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -185,18 +197,18 @@ public class WallActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * Send image, uploads the thumbnail picture to firebase
+     * @param pic thumbnail to upload
+     * @param name unique name for the image
      * */
     private void sendPhoto(Bitmap pic, String name) {
         inputText = (EditText) findViewById(R.id.messageInput);
-        String input = inputText.getText().toString();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pic.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-
         byte[] data = baos.toByteArray();
-
         StorageReference storageRef = storage.getReferenceFromUrl("gs://geowallapp.appspot.com/").child("images/"+name);
         UploadTask uploadTask = storageRef.putBytes(data);
+
         uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
@@ -221,16 +233,12 @@ public class WallActivity extends AppCompatActivity {
                 msg.setId("");
                 timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(new Date());
                 msg.setTimestamp( timeStamp);
-                // Create a new, auto-generated child of that chat location, and save our chat data there
+                // Create a new, auto-generated child of that chat location, and save image url
                 mRef.push().setValue(msg);
                 inputText.setText("");
                 listView.setSelection(listView.getCount());
                 listView.smoothScrollToPosition(listView.getCount());
             }
         });
-
-
-
     }
-
 }

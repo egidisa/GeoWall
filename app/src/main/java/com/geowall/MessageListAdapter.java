@@ -15,7 +15,6 @@ import com.squareup.picasso.Picasso;
 
 
 /**
- * @author sara
  * This class uses FirebaseListAdapter. It uses the <code>Mesage</code> class to encapsulate the
  * data for each individual chat message
  */
